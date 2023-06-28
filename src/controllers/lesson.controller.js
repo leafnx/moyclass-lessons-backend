@@ -108,9 +108,22 @@ class LessonController {
   }
 
   async createLessons(req, res) {
-    const {  } = req.body
-
-    res.status(200).json({ msg: 'it works' })
+    try {
+      const {
+        teacherIds,
+        title = 'Blue Ocean',
+        days,
+        firstDate,
+        lessonsCount,
+        lastDate
+      } = req.body
+  
+      res.status(200).json({ msg: 'it works' })
+    }
+    catch {
+      console.error(err)
+      res.status(400).json({ error: err.message }).end()
+    }
   }
 }
 
