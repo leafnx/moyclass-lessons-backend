@@ -25,7 +25,6 @@
 `DELETE '/'` - Clear out test data.
 > Удаляет все уроки с названием 'Blue Ocean'
 
-<br />
 #### .env required values:
 ```
 DB_USERNAME="username for db access"
