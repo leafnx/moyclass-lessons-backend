@@ -2,9 +2,9 @@ import pg from 'pg'
 
 const db = new pg.Pool({
   user: process.env.DB_USERNAME,
-  host: process.env.DB_HOST,
-  database: process.env.DB_DATABASE,
   password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
+  host: process.env.DB_HOST,
   port: process.env.DB_PORT
 })
 

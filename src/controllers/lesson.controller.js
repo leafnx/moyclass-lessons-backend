@@ -1,3 +1,4 @@
+import moment from "moment/moment.js"
 import db from "../db.js"
 
 class LessonController {
@@ -117,10 +118,86 @@ class LessonController {
         lessonsCount,
         lastDate
       } = req.body
-  
-      res.status(200).json({ msg: 'it works' })
+
+      if (lessonsCount && lastDate) {
+        throw { message: `You must provide only one of: (lessonsCount, lastDate)` }
+      }
+
+      const lessonsCountFormatted = lessonsCount || 300
+      const lastDateFormatted = lastDate || moment(firstDate).add(1, 'year').format('YYYY-MM-DD')
+
+      const query = `
+        WITH insert_l as (
+          INSERT INTO lessons (date, title)
+          SELECT
+            gs::date as date,
+            $2 as title
+          FROM generate_series(
+            $4::date, $6::date, '1 day'
+          ) gs
+        
+          WHERE extract(dow from gs) = ANY($3::int[])
+        
+          ORDER BY date ASC
+          LIMIT $5
+        
+          RETURNING id
+        ),
+        insert_lt as (
+          INSERT INTO lesson_teachers (lesson_id, teacher_id)
+          SELECT
+            insert_l.id,
+            t.id
+          FROM insert_l
+        
+          JOIN teachers t
+          ON t.id = ANY($1::int[])
+        )
+        
+        SELECT * FROM insert_l
+      `
+
+      const addedIds = await db.query(query, [
+        teacherIds,
+        title,
+        days,
+        firstDate,
+        lessonsCountFormatted,
+        lastDateFormatted
+      ])
+      const addedIdsFormatted = addedIds.rows.map(row => row.id)
+
+      res.status(200).json({ addedIds: addedIdsFormatted })
     }
-    catch {
+    catch (err) {
+      console.error(err)
+      res.status(400).json({ error: err.message }).end()
+    }
+  }
+
+  async clear(req, res) {
+    try {
+      const query = `
+        WITH delete_l as (
+          DELETE FROM lessons
+          WHERE title = 'Blue Ocean'
+          RETURNING id
+        ),
+        delete_lt as (
+          DELETE FROM lesson_teachers
+          USING delete_l
+          WHERE lesson_id = delete_l.id
+        )
+        
+        SELECT * FROM delete_l
+      `
+
+      const deletedIds = await db.query(query)
+      const deletedIdsFormatted = deletedIds.rows.map(row => row.id)
+  
+      res.status(200).json({ deletedIds: deletedIdsFormatted })
+    }
+    catch (err) {
       console.error(err)
       res.status(400).json({ error: err.message }).end()
     }

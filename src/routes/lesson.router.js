@@ -5,5 +5,6 @@ const lessonRouter = new Router()
 
 lessonRouter.get('/', lessonController.getLessons)
 lessonRouter.post('/lessons', lessonController.createLessons)
+lessonRouter.delete('/', lessonController.clear)
 
 export default lessonRouter
