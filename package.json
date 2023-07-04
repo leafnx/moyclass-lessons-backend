@@ -5,7 +5,7 @@
   "main": "src/app.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "start": "node src/app.js",
     "dev": "nodemon src/app.js"
   },
@@ -19,6 +19,11 @@
     "pg": "^8.11.0"
   },
   "devDependencies": {
+    "jest": "^29.5.0",
     "nodemon": "^2.0.22"
+  },
+  "jest": {
+    "transform": {},
+    "testEnvironment": "jest-environment-node"
   }
 }
